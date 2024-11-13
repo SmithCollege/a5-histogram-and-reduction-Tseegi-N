@@ -3,8 +3,8 @@
 #include <math.h>
 
 // define constants
-#define BLOCK_SIZE 256
-#define SIZE 100
+#define BLOCK_SIZE 1024
+#define SIZE 1000000
 
 // function to apply reduction on arrays
 __global__ void reduct(int *in, int *out, int n){
@@ -15,10 +15,10 @@ __global__ void reduct(int *in, int *out, int n){
 
     // store memory
     if(idx <n){
-        shared[idx] = in[idx];
+        shared[tid] = in[idx];
     }
     else{
-        shared[idx] = 0;
+        shared[tid] = 0;
     }
     __syncthreads();
 
@@ -54,6 +54,7 @@ int main(void) {
    //
     while(elmtSize > 1){
         int gridSize = (elmtSize + BLOCK_SIZE - 1)/BLOCK_SIZE;
+        std::cout << "Grid Size: " << gridSize << " Block Size: " << BLOCK_SIZE << " \n";
         reduct<<<gridSize, BLOCK_SIZE>>>(temp_in, temp_out, elmtSize);
         cudaDeviceSynchronize();
 
@@ -73,7 +74,7 @@ int main(void) {
         std::cout << "Kernel completed successfully!" << std::endl;
     }
 
-    std::cout << "Result: " << output[0] << std::endl;
+    std::cout << "Result: " << temp_in[0] << std::endl;
 
     // print out input and output array
     /*

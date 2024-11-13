@@ -3,8 +3,8 @@
 #include <math.h>
 
 // define constants
-#define BLOCK_SIZE 256
-#define SIZE 100
+#define BLOCK_SIZE 1024
+#define SIZE 1000000
 
 // function to apply reduction on arrays
 __global__ void reduct(int *in, int *out, int n){
@@ -51,17 +51,18 @@ int main(void) {
     int *temp_in = input;
     int *temp_out = output;
 
-   //
+    // compute
     while(elmtSize > 1){
         int gridSize = (elmtSize + BLOCK_SIZE - 1)/BLOCK_SIZE;
+        std::cout << "Grid Size: " << gridSize << " Block Size: " << BLOCK_SIZE << " \n";
         reduct<<<gridSize, BLOCK_SIZE>>>(temp_in, temp_out, elmtSize);
         cudaDeviceSynchronize();
 
-       // update values
-       elmtSize = gridSize;
-       int *temp = temp_in;
-       temp_in = temp_out;
-       temp_out = temp;
+        // update values
+        elmtSize = gridSize;
+        int *temp = temp_in;
+        temp_in = temp_out;
+        temp_out = temp;
     }
 
     // check for error
@@ -73,9 +74,10 @@ int main(void) {
         std::cout << "Kernel completed successfully!" << std::endl;
     }
 
-    std::cout << "Result: " << output[0] << std::endl;
+    std::cout << "Result: " << temp_in[0] << std::endl;
 
     // print out input and output array
+    /*
     std::cout << "Input array:" << std::endl;
     for (int i = 0; i < SIZE; i++) {
         std::cout << input[i] << " ";
@@ -87,6 +89,7 @@ int main(void) {
         std::cout << output[i] << " ";
     }
     std::cout << std::endl;
+    */
 
   // free memory
     cudaFree(input);
